@@ -6,7 +6,6 @@ import android.util.Log
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import java.security.Key
 import java.security.PrivateKey
-import java.security.SecureRandom
 import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.Mac
@@ -24,18 +23,16 @@ class CipherBoxImpl : CipherBox {
 
   override fun initEncryptCipher(key: Key): Cipher {
     val cipher = Cipher.getInstance(CIPHER_ALGORITHM)
-    val sRandom = SecureRandom()
-    val nonce = ByteArray(12)
-    sRandom.nextBytes(nonce)
-    val spec = GCMParameterSpec(GCM_TAG_LEN, nonce)
-    cipher.init(Cipher.ENCRYPT_MODE, key, spec)
+    cipher.init(Cipher.ENCRYPT_MODE, key)
     // iv/nounce: being added by cipher.init library
     return cipher
   }
 
   override fun encryptData(cipher: Cipher, data: String): EncryptedOutput {
     val encryptedData = cipher.doFinal(data.toByteArray(), 0, data.toByteArray().size)
-    Log.i("cipherBoxImpl", "encryptedData len ${data.length}")
+    Log.i("CipherBoxImpl", "encryptedData len ${data.length}")
+    Log.i("CipherBoxImpl", "Crypto provider during encrypt=${cipher.provider}")
+    Log.i("CipherBoxImpl", "IV during encrypt=${cipher.iv}")
     return EncryptedOutput(encryptedData, cipher.iv)
   }
 
@@ -50,6 +47,9 @@ class CipherBoxImpl : CipherBox {
 
   override fun decryptData(cipher: Cipher, encryptedOutput: EncryptedOutput): ByteArray {
     try {
+      Log.i("cipherBoxImpl", "encryptedData len ${encryptedOutput.encryptedData.size}")
+      Log.i("CipherBoxImpl", "Crypto provider during decrypt=${cipher.provider}")
+      Log.i("CipherBoxImpl", "IV during encrypt=${cipher.iv}")
       return cipher.doFinal(encryptedOutput.encryptedData, 0, encryptedOutput.encryptedData.size)
     } catch (e: Exception) {
       Log.e("Secure","Exception in Decryption",e)
