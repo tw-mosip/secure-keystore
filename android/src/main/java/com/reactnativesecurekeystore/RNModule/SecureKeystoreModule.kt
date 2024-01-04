@@ -7,7 +7,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.reactnativesecurekeystore.biometrics.Biometrics
 import com.reactnativesecurekeystore.common.Util
-import kotlin.math.log
 
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   private val keyGenerator = KeyGeneratorImpl()
@@ -63,8 +62,7 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
 
   @ReactMethod
   fun encryptData(alias: String, data: String, promise: Promise) {
-    Log.d(logTag, "Encrypting data")
-
+    Log.d(logTag, "Encrypting data ${data} length: ${data.length}")
     keystore.encryptData(
       alias,
       data,
