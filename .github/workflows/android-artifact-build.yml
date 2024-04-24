@@ -16,6 +16,7 @@ on:
 
 jobs:
   maven-publish:
+    if: "${{ !contains(github.ref, 'master') && github.event_name != 'pull_request' &&  github.event_name == 'workflow_dispatch' }}"
     uses: mosip/kattu/.github/workflows/maven-publish-android.yml@master
     with:
       SERVICE_LOCATION: '.'
@@ -27,5 +28,3 @@ jobs:
       OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
       GPG_SECRET: ${{ secrets.GPG_SECRET }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
-#      Specify secrets.SLACK_WEBHOOK_URL (maven-publish/maven-android build) Error => Either Kattu has to be changed to SLACK_WEBHOOK_INJI_TEAM or this to SLACK_WEBHOOK_URL
-#      gpg: can't open './.github/keys/mosipgpgkey_pub.gpg': No such file or directory => GPG Keys not present in the repository
