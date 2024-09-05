@@ -29,12 +29,18 @@ jobs:
     secrets:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
 
+  build-kotlin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo a message
+        run: echo "coming soon"
+
   publish-secure-keystore-to-npm-registry:
     if: "${{ !contains(github.ref, 'master') && github.event_name != 'pull_request' &&  github.event_name == 'workflow_dispatch' }}"
-    needs: build-secure-keystore
+    #needs: build-secure-keystore
     uses: mosip/kattu/.github/workflows/npm-publish-to-npm-registry.yml@master
     with:
-      SERVICE_LOCATION: '.'
+      SERVICE_LOCATION: 'js'
       ANDROID_LOCATION: 'android'
     secrets:
       NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
