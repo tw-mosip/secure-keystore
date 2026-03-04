@@ -12,3 +12,10 @@ const val ENCRYPTION_KEY_SIZE = 256
 
 const val PUBLIC_KEY_STORING_ID = "_publicKey"
 const val PRIVATE_KEY_STORING_ID = "_privateKey"
+
+enum class SigningAlgorithm(val value: String) {
+    RSA("RS256"),
+    ES256("ES256"),
+    EDDSA("EdDSA"),
+    ES256K("ES256K"),
+}
