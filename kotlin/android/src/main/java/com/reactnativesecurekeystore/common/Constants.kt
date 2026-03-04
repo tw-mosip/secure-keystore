@@ -17,5 +17,12 @@ enum class SigningAlgorithm(val value: String) {
     RSA("RS256"),
     ES256("ES256"),
     EDDSA("EdDSA"),
-    ES256K("ES256K"),
+    ES256K("ES256K");
+
+    companion object {
+        fun contains(value: String): Boolean {
+            return values().any { it.value.equals(value, ignoreCase = true) }
+        }
+    }
 }
+

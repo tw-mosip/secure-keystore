@@ -4,6 +4,19 @@ A Kotlin/Android library for secure key management using Android's hardware-back
 
 ---
 
+## 🆕 What's New in v2
+
+The `SecureKeystoreV2` interface was introduced to improve the Generic Key Storage API. The following changes were made:
+
+| Change | v1 (Deprecated) | v2 (Current) |
+|--------|----------------|--------------|
+| Store a key pair | `storeGenericKey(publicKey, privateKey, account)` | `storeKeyPair(publicKey, privateKey, alias)` |
+| Retrieve a key pair | `retrieveGenericKey(account, context)` | `retrieveKeyPair(alias, context, isBiometricRequiredToFetch)` |
+
+> **Note:** `SecureKeystoreV2` extends `SecureKeystore`. The deprecated v1 methods (`storeGenericKey`, `retrieveGenericKey`) remain available for backwards compatibility but delegate to their v2 equivalents. They will be removed in a future release. Migrate to the new methods as soon as possible.
+
+---
+
 ## Feature Support
 
 The Secure-Keystore library provides hardware-backed key management for symmetric, asymmetric, and HMAC keys using Android’s Keystore system.
@@ -131,6 +144,35 @@ Removes all keys stored in the keystore.
 **Signature:**
 ```kotlin
 fun removeAllKeys()
+```
+
+---
+
+#### retrieveKey
+
+Retrieves the public key in PEM format for the given alias from the Android Keystore.
+
+**Signature:**
+```kotlin
+fun retrieveKey(alias: String): String
+```
+
+**Parameters:**
+
+| Name  | Type   | Required | Description         |
+|-------|--------|----------|---------------------|
+| alias | String | Yes      | The key identifier  |
+
+**Returns:**
+
+| Type   | Description              |
+|--------|--------------------------|
+| String | Public key in PEM format |
+
+**Example:**
+```kotlin
+val publicKeyPem = SecureKeystore.retrieveKey("rsa_key")
+println(publicKeyPem) // -----BEGIN PUBLIC KEY-----...
 ```
 
 ---
@@ -453,26 +495,28 @@ SecureKeystore.generateHmacSha(
 
 ### Generic Key Storage
 
+> ⚠️ **Deprecation Notice:** `storeGenericKey` and `retrieveGenericKey` are deprecated as of v2. Use [`storeKeyPair`](#storekeypair) and [`retrieveKeyPair`](#retrievekeypair) instead.
+
 #### storeKeyPair
 
-Stores the specified public and private key pair associated with the account.
+Stores the specified public and private key pair associated with the alias. This method replaces the deprecated `storeGenericKey`.
 
 **Signature:**
 ```kotlin
 fun storeKeyPair(
     publicKey: String,
     privateKey: String,
-    account: String
+    alias: String
 )
 ```
 
 **Parameters:**
 
-| Name       | Type | Required | Description          |
-|------------|------|----------|----------------------|
-| publicKey  | String | Yes | Public key to store  |
-| privateKey | String | Yes | Private key to store |
-| alias      | String | Yes | Key pair identifier  |
+| Name       | Type   | Required | Description          |
+|------------|--------|----------|----------------------|
+| publicKey  | String | Yes      | Public key to store  |
+| privateKey | String | Yes      | Private key to store |
+| alias      | String | Yes      | Key pair identifier  |
 
 **Example:**
 ```kotlin
@@ -487,60 +531,82 @@ SecureKeystore.storeKeyPair(
 
 #### retrieveKeyPair
 
-Retrieves a list of keys associated with the specified account.
+Retrieves the public and private keys associated with the specified alias. For sensitive key types (`ES256K`, `EdDSA`), biometric authentication is triggered automatically. This method replaces the deprecated `retrieveGenericKey`.
 
 **Signature:**
 ```kotlin
-fun retrieveKeyPair(alias: String): Array<String>
+fun retrieveKeyPair(alias: String, context: Any, isBiometricRequiredToFetch: Boolean = false): List<String>
 ```
 
 **Parameters:**
 
-| Name  | Type | Required | Description         |
-|-------|------|----------|---------------------|
-| alias | String | Yes | Key pair identifier |
+| Name                      | Type    | Required | Default | Description                                                                                  |
+|---------------------------|---------|----------|---------|----------------------------------------------------------------------------------------------|
+| alias                     | String  | Yes      | N/A     | Key pair identifier                                                                          |
+| context                   | Any     | Yes      | N/A     | `FragmentActivity` context, required for biometric authentication prompts                    |
+| isBiometricRequiredToFetch | Boolean | No      | `false` | When `true`, biometric authentication is enforced before the key pair is returned regardless of key type |
 
 **Returns:**
 
-| Type | Description |
-|------|-------------|
-| Array<String> | Array of keys associated with the account |
+| Type          | Description                                              |
+|---------------|----------------------------------------------------------|
+| List\<String\> | List containing `[privateKey, publicKey]` for the alias |
 
 **Example:**
 ```kotlin
-val keys = SecureKeystore.retrieveKeyPair("user@example.com")
-keys.forEach { key ->
-    println("Key: $key")
-}
+val keys = SecureKeystore.retrieveKeyPair("user@example.com", this)
+val privateKey = keys[0]
+val publicKey  = keys[1]
 ```
 
 ---
 
-#### retrieveKey
+#### ~~storeGenericKey~~ *(Deprecated)*
 
-Retrieves the key associated with the alias.
+> ⚠️ **Deprecated.** Use [`storeKeyPair`](#storekeypair) instead.
+
+Stores a public and private key pair associated with the account. This method now delegates to `storeKeyPair` internally.
 
 **Signature:**
 ```kotlin
-fun retrieveKey(alias: String): String
+@Deprecated("Use storeKeyPair instead")
+fun storeGenericKey(
+    publicKey: String,
+    privateKey: String,
+    account: String
+)
 ```
 
-**Parameters:**
-
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| alias | String | Yes | Key identifier |
-
-**Returns:**
-
-| Type | Description |
-|------|-------------|
-| String | The key associated with the alias |
-
-**Example:**
+**Migration:**
 ```kotlin
-val publicKey = SecureKeystore.retrieveKey("my_key")
-println("Public Key: $publicKey")
+// Before (v1 - deprecated)
+SecureKeystore.storeGenericKey(publicKey, privateKey, account)
+
+// After (v2)
+SecureKeystore.storeKeyPair(publicKey, privateKey, alias = account)
+```
+
+---
+
+#### ~~retrieveGenericKey~~ *(Deprecated)*
+
+> ⚠️ **Deprecated.** Use [`retrieveKeyPair`](#retrievekeypair) instead.
+
+Retrieves keys associated with the specified account. This method now delegates to `retrieveKeyPair` internally.
+
+**Signature:**
+```kotlin
+@Deprecated("Use retrieveKeyPair instead")
+fun retrieveGenericKey(account: String, context: Any): List<String>
+```
+
+**Migration:**
+```kotlin
+// Before (v1 - deprecated)
+val keys = SecureKeystore.retrieveGenericKey(account, context)
+
+// After (v2)
+val keys = SecureKeystore.retrieveKeyPair(alias = account, context = this)
 ```
 
 ---

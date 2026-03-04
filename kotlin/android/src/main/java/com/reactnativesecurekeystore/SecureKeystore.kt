@@ -43,7 +43,7 @@ interface SecureKeystore {
 
     @Deprecated(
         message = "Use retrieveKeyPair instead",
-        replaceWith = ReplaceWith("retrieveKeyPair(account, context)")
+        replaceWith = ReplaceWith("retrieveKeyPair(account, context, isBiometricRequiredToFetch)"),
     )
     fun  retrieveGenericKey(account: String, context: Any): List<String>
 
@@ -51,7 +51,7 @@ interface SecureKeystore {
 
     @Deprecated(
         message = "Use storeKeyPair instead",
-        replaceWith = ReplaceWith("storeKeyPair(publicKey, privateKey, account)")
+        replaceWith = ReplaceWith("storeKeyPair(publicKey, privateKey, alias)")
     )
     fun storeGenericKey(publicKey: String,privateKey: String,account: String)
 

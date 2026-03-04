@@ -231,7 +231,7 @@ class SecureKeystoreImpl(
 
     @Deprecated(
         "Use retrieveKeyPair instead",
-        replaceWith = ReplaceWith("retrieveKeyPair(account, context)")
+        replaceWith = ReplaceWith("retrieveKeyPair(account, context, isBiometricRequiredToFetch)"),
     )
     override fun retrieveGenericKey(account: String, context: Any): List<String> {
         return retrieveKeyPair(account, context)
@@ -283,7 +283,7 @@ class SecureKeystoreImpl(
 
     @Deprecated(
         "Use storeKeyPair instead",
-        replaceWith = ReplaceWith("storeKeyPair(publicKey, privateKey, account)")
+        replaceWith = ReplaceWith("storeKeyPair(publicKey, privateKey, alias)")
     )
     override fun storeGenericKey(
         publicKey: String,
@@ -303,7 +303,11 @@ class SecureKeystoreImpl(
 
     }
 
-    override fun retrieveKeyPair(alias: String, context: Any): List<String> {
+    override fun retrieveKeyPair(
+        alias: String,
+        context: Any,
+        isBiometricRequiredToFetch: Boolean
+    ): List<String> {
         try {
             val privateKeyAlias = Util.getPrivateKeyId(alias)
             val publicKeyAlias = Util.getPublicKeyId(alias)
@@ -312,7 +316,7 @@ class SecureKeystoreImpl(
 
             val fragmentActivity = context as? FragmentActivity
                 ?: throw IllegalArgumentException("Context must be a FragmentActivity for biometric authentication")
-            if (alias == SigningAlgorithm.ES256K.value || alias == SigningAlgorithm.EDDSA.value) {
+            if (SigningAlgorithm.contains(alias) || isBiometricRequiredToFetch) {
 
                 val success = authenticateBiometricallyBlocking(fragmentActivity, privateKeyAlias)
 
