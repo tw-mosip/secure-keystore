@@ -1,4 +1,4 @@
-name: Gradlew build, publish to npm registry and sonar-analysis
+name: Gradlew build and sonar-analysis
 on:
   release:
     types: [published]
