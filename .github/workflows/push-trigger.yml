@@ -21,7 +21,7 @@ on:
       - MOSIP*
 jobs:
   build-kotlin:
-    uses: mosip/kattu/.github/workflows/gradle-build.yml@master
+    uses: mosip/kattu/.github/workflows/gradle-build.yml@gpgupdate-masterj21
     with:
       SERVICE_LOCATION: kotlin/android
       JAVA_VERSION: 17
@@ -31,7 +31,7 @@ jobs:
   sonar-analysis-kotlin:
     needs: build-kotlin
     if: "${{  github.event_name != 'pull_request' }}"
-    uses: mosip/kattu/.github/workflows/gradlew-sonar-analysis.yml@dsd9685
+    uses: mosip/kattu/.github/workflows/gradlew-sonar-analysis.yml@gpgupdate-masterj21
     with:
       SERVICE_LOCATION: kotlin/android
     secrets:
